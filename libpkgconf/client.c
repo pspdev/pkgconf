@@ -60,6 +60,8 @@ trace_path_list(const pkgconf_client_t *client, const char *desc, pkgconf_list_t
 void
 pkgconf_client_dir_list_build(pkgconf_client_t *client, const pkgconf_cross_personality_t *personality)
 {
+	// pspdev: ignore env flags PKG_CONFIG_LIBDIR and PKG_CONFIG_PATH
+#if 0
 	pkgconf_path_build_from_environ("PKG_CONFIG_PATH", NULL, &client->dir_list, true);
 
 	if (!(client->flags & PKGCONF_PKG_PKGF_ENV_ONLY))
@@ -77,6 +79,9 @@ pkgconf_client_dir_list_build(pkgconf_client_t *client, const pkgconf_cross_pers
 		pkgconf_path_copy_list(&client->dir_list, prepend_list);
 		pkgconf_path_free(&dir_list);
 	}
+#else
+	pkgconf_path_copy_list(&client->dir_list, &personality->dir_list);
+#endif
 }
 
 /*

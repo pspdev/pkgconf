@@ -24,14 +24,13 @@
 #include <libpkgconf/bsdstubs.h>
 #include <libpkgconf/config.h>
 
-#ifndef HAVE_STRLCPY
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-static inline size_t
-strlcpy(char *dst, const char *src, size_t siz)
+size_t
+pkgconf_strlcpy(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;
@@ -55,9 +54,7 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return(s - src - 1);	/* count does not include NUL */
 }
-#endif
 
-#ifndef HAVE_STRLCAT
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters
@@ -65,8 +62,8 @@ strlcpy(char *dst, const char *src, size_t siz)
  * Returns strlen(src) + MIN(siz, strlen(initial dst)).
  * If retval >= siz, truncation occurred.
  */
-static inline size_t
-strlcat(char *dst, const char *src, size_t siz)
+size_t
+pkgconf_strlcat(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;
@@ -92,7 +89,6 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));	/* count does not include NUL */
 }
-#endif
 
 /*
  * Copyright (c) 2012 William Pitcock <nenolod@dereferenced.org>.
@@ -106,34 +102,14 @@ strlcat(char *dst, const char *src, size_t siz)
  * from the use of this software.
  */
 
-#ifndef HAVE_STRNDUP
 /*
  * Creates a memory buffer and copies at most 'len' characters to it.
  * If 'len' is less than the length of the source string, truncation occured.
  */
-static inline char *
-strndup(const char *src, size_t len)
+char *
+pkgconf_strndup(const char *src, size_t len)
 {
 	char *out = malloc(len + 1);
 	pkgconf_strlcpy(out, src, len + 1);
 	return out;
-}
-#endif
-
-size_t
-pkgconf_strlcpy(char *dst, const char *src, size_t siz)
-{
-	return strlcpy(dst, src, siz);
-}
-
-size_t
-pkgconf_strlcat(char *dst, const char *src, size_t siz)
-{
-	return strlcat(dst, src, siz);
-}
-
-char *
-pkgconf_strndup(const char *src, size_t len)
-{
-	return strndup(src, len);
 }

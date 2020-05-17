@@ -30,4 +30,5 @@ core
 /pkgconf-gcov
 /pkgconf-profile
 
-Makefile
+/psp-pkg-config
+libpkgconf/config.h

@@ -90,10 +90,28 @@ pkgconf_cross_personality_default(void)
 	if (default_personality_init)
 		return &default_personality;
 
-	build_default_search_path(&default_personality.dir_list);
+	// relocate to $PSPDEV directory
+	char *pspdev_dir;
+	if ((pspdev_dir = getenv("PSPDEV")) != NULL) {
+		char outbuf[PKGCONF_ITEM_SIZE];
 
-	pkgconf_path_split(SYSTEM_LIBDIR, &default_personality.filter_libdirs, true);
-	pkgconf_path_split(SYSTEM_INCLUDEDIR, &default_personality.filter_includedirs, true);
+		pkgconf_strlcpy(outbuf, pspdev_dir, sizeof(outbuf));
+		pkgconf_strlcat(outbuf, "/psp/lib/pkgconfig", sizeof(outbuf));
+		pkgconf_path_add(outbuf, &default_personality.dir_list, true);
+
+		pkgconf_strlcpy(outbuf, pspdev_dir, sizeof(outbuf));
+		pkgconf_strlcat(outbuf, "/psp/lib", sizeof(outbuf));
+		pkgconf_path_add(outbuf, &default_personality.filter_libdirs, true);
+
+		pkgconf_strlcpy(outbuf, pspdev_dir, sizeof(outbuf));
+		pkgconf_strlcat(outbuf, "/psp/include", sizeof(outbuf));
+		pkgconf_path_add(outbuf, &default_personality.filter_includedirs, true);
+	} else {
+		build_default_search_path(&default_personality.dir_list);
+
+		pkgconf_path_split(SYSTEM_LIBDIR, &default_personality.filter_libdirs, true);
+		pkgconf_path_split(SYSTEM_INCLUDEDIR, &default_personality.filter_includedirs, true);
+	}
 
 	default_personality_init = true;
 	return &default_personality;

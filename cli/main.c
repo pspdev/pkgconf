@@ -1022,6 +1022,12 @@ main(int argc, char *argv[])
 		return EXIT_SUCCESS;
 	}
 
+	// pspdev: always static linking, always add hosted libs dir, relocate to prefix
+	want_flags |= PKG_STATIC|PKG_KEEP_SYSTEM_CFLAGS|PKG_KEEP_SYSTEM_LIBS|PKG_DEFINE_PREFIX;
+	want_client_flags |= PKGCONF_PKG_PKGF_SEARCH_PRIVATE| \
+		PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS|PKGCONF_PKG_PKGF_REDEFINE_PREFIX;
+	// end pspdev
+
 	if ((want_flags & PKG_SHORT_ERRORS) == PKG_SHORT_ERRORS)
 		want_client_flags |= PKGCONF_PKG_PKGF_SIMPLIFY_ERRORS;
 
