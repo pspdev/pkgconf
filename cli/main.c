@@ -639,7 +639,7 @@ usage(void)
 	printf("  --log-file=filename               write an audit log to a specified file\n");
 	printf("  --with-path=path                  adds a directory to the search path\n");
 	printf("  --define-prefix                   override the prefix variable with one that is guessed based on\n");
-	printf("                                    the location of the .pc file\n");
+	printf("                                    the location of the .pc file (default for PSP)\n");
 	printf("  --dont-define-prefix              do not override the prefix variable under any circumstances\n");
 	printf("  --prefix-variable=varname         sets the name of the variable that pkgconf considers\n");
 	printf("                                    to be the package prefix\n");
@@ -663,10 +663,10 @@ usage(void)
 	printf("  --no-provides                     do not use 'provides' rules to resolve dependencies\n");
 	printf("  --maximum-traverse-depth          maximum allowed depth for dependency graph\n");
 	printf("  --static                          be more aggressive when computing dependency graph\n");
-	printf("                                    (for static linking)\n");
+	printf("                                    (for static linking, default for PSP)\n");
 	printf("  --pure                            optimize a static dependency graph as if it were a normal\n");
 	printf("                                    dependency graph\n");
-	printf("  --env-only                        look only for package entries in PKG_CONFIG_PATH\n");
+	printf("  --env-only                        look only for package entries in PSP_PKG_CONFIG_PATH\n");
 	printf("  --ignore-conflicts                ignore 'conflicts' rules in modules\n");
 	printf("  --validate                        validate specific .pc files for correctness\n");
 
@@ -689,8 +689,8 @@ usage(void)
 #ifndef PKGCONF_LITE
 	printf("  --digraph                         print entire dependency graph in graphviz 'dot' format\n");
 #endif
-	printf("  --keep-system-cflags              keep -I%s entries in cflags output\n", SYSTEM_INCLUDEDIR);
-	printf("  --keep-system-libs                keep -L%s entries in libs output\n", SYSTEM_LIBDIR);
+	printf("  --keep-system-cflags              keep -I$PSPDEV/psp/include entries in cflags output (default for PSP)\n");
+	printf("  --keep-system-libs                keep -L$PSPDEV/psp/lib entries in libs output (default for PSP)\n");
 	printf("  --path                            show the exact filenames for any matching .pc files\n");
 	printf("  --modversion                      print the specified module's version to stdout\n");
 	printf("  --internal-cflags                 do not filter 'internal' cflags from output\n");
@@ -1024,9 +1024,6 @@ main(int argc, char *argv[])
 
 	// pspdev: always static linking, always add hosted libs dir, relocate to prefix
 	want_flags |= PKG_STATIC|PKG_KEEP_SYSTEM_CFLAGS|PKG_KEEP_SYSTEM_LIBS|PKG_DEFINE_PREFIX;
-	want_client_flags |= PKGCONF_PKG_PKGF_SEARCH_PRIVATE| \
-		PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS|PKGCONF_PKG_PKGF_REDEFINE_PREFIX;
-	// end pspdev
 
 	if ((want_flags & PKG_SHORT_ERRORS) == PKG_SHORT_ERRORS)
 		want_client_flags |= PKGCONF_PKG_PKGF_SIMPLIFY_ERRORS;
