@@ -49,9 +49,14 @@ libpkgconf/config.h:
 	@echo '#define PACKAGE_VERSION "1.6.2"' >> $@
 	@echo '#define PACKAGE PACKAGE_NAME " " PACKAGE_VERSION' >> $@
 
+.c.o:
+	@echo "CC   $<"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
 psp-pkg-config: libpkgconf/config.h ${OBJS}
-	${CC} ${STATIC} -o $@ ${OBJS}
-	${STRIP} $@
+	@echo "CCLD $@"
+	@${CC} ${STATIC} -o $@ ${OBJS}
+	@${STRIP} $@
 
 install: psp-pkg-config
 	install -Dm755 psp-pkg-config ${DESTDIR}${PSPDEV}/bin/psp-pkg-config
