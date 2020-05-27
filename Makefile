@@ -59,8 +59,10 @@ psp-pkg-config: libpkgconf/config.h ${OBJS}
 	@${STRIP} $@
 
 install: psp-pkg-config
-	install -Dm755 psp-pkg-config ${DESTDIR}${PSPDEV}/bin/psp-pkg-config
-	install -Dm644 pkg.m4 ${DESTDIR}${PSPDEV}/psp/share/aclocal/pkg.m4
+	mkdir -p ${DESTDIR}${PSPDEV}/bin
+	install -m755 psp-pkg-config ${DESTDIR}${PSPDEV}/bin
+	mkdir -p ${DESTDIR}${PSPDEV}/psp/share/aclocal
+	install -m644 pkg.m4 ${DESTDIR}${PSPDEV}/psp/share/aclocal
 
 uninstall:
 	@test -e ${DESTDIR}${PSPDEV}/bin/psp-pkg-config && \
