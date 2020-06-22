@@ -69,6 +69,7 @@
 #define PKG_MSVC_SYNTAX			(((uint64_t) 1) << 41)
 #define PKG_INTERNAL_CFLAGS		(((uint64_t) 1) << 42)
 #define PKG_DUMP_PERSONALITY		(((uint64_t) 1) << 43)
+#define PKG_SHARED			(((uint64_t) 1) << 44)
 
 static pkgconf_client_t pkg_client;
 static const pkgconf_fragment_render_ops_t *want_render_ops = NULL;
@@ -602,7 +603,7 @@ static void
 about(void)
 {
 	printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
-	printf("Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019\n");
+	printf("Copyright (c) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020\n");
 	printf("    pkgconf authors (see AUTHORS in documentation directory).\n\n");
 	printf("Permission to use, copy, modify, and/or distribute this software for any\n");
 	printf("purpose with or without fee is hereby granted, provided that the above\n");
@@ -664,6 +665,7 @@ usage(void)
 	printf("  --maximum-traverse-depth          maximum allowed depth for dependency graph\n");
 	printf("  --static                          be more aggressive when computing dependency graph\n");
 	printf("                                    (for static linking, default for PSP)\n");
+	printf("  --shared                          use a simplified dependency graph (usually default)\n");
 	printf("  --pure                            optimize a static dependency graph as if it were a normal\n");
 	printf("                                    dependency graph\n");
 	printf("  --env-only                        look only for package entries in PSP_PKG_CONFIG_PATH\n");
@@ -827,6 +829,7 @@ main(int argc, char *argv[])
 		{ "short-errors", no_argument, &want_flags, PKG_SHORT_ERRORS, },
 		{ "maximum-traverse-depth", required_argument, NULL, 11, },
 		{ "static", no_argument, &want_flags, PKG_STATIC, },
+		{ "shared", no_argument, &want_flags, PKG_SHARED, },
 		{ "pure", no_argument, &want_flags, PKG_PURE, },
 		{ "print-requires", no_argument, &want_flags, PKG_REQUIRES, },
 		{ "print-variables", no_argument, &want_flags, PKG_VARIABLES|PKG_PRINT_ERRORS, },
@@ -968,7 +971,7 @@ main(int argc, char *argv[])
 	pkgconf_client_init(&pkg_client, error_handler, NULL, personality);
 
 #ifndef PKGCONF_LITE
-	if ((want_flags & PKG_MSVC_SYNTAX) == PKG_MSVC_SYNTAX)
+	if ((want_flags & PKG_MSVC_SYNTAX) == PKG_MSVC_SYNTAX || getenv("PKG_CONFIG_MSVC_SYNTAX") != NULL)
 		want_render_ops = msvc_renderer_get();
 #endif
 
@@ -1002,18 +1005,8 @@ main(int argc, char *argv[])
 
 	if ((want_flags & PKG_VERSION) == PKG_VERSION)
 	{
-		if (argc > 2)
-		{
-			fprintf(stderr, "%s: --version specified with other options or module names, assuming --modversion.\n", argv[0]);
-
-			want_flags &= ~PKG_VERSION;
-			want_flags |= PKG_MODVERSION;
-		}
-		else
-		{
-			version();
-			return EXIT_SUCCESS;
-		}
+		version();
+		return EXIT_SUCCESS;
 	}
 
 	if ((want_flags & PKG_HELP) == PKG_HELP)
@@ -1040,8 +1033,11 @@ main(int argc, char *argv[])
 	if ((want_flags & PKG_IGNORE_CONFLICTS) == PKG_IGNORE_CONFLICTS || getenv("PKG_CONFIG_IGNORE_CONFLICTS") != NULL)
 		want_client_flags |= PKGCONF_PKG_PKGF_SKIP_CONFLICTS;
 
-	if ((want_flags & PKG_STATIC) == PKG_STATIC)
+	if ((want_flags & PKG_STATIC) == PKG_STATIC || personality->want_default_static)
 		want_client_flags |= (PKGCONF_PKG_PKGF_SEARCH_PRIVATE | PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS);
+
+	if ((want_flags & PKG_SHARED) == PKG_SHARED)
+		want_client_flags &= ~(PKGCONF_PKG_PKGF_SEARCH_PRIVATE | PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS);
 
 	/* if --static and --pure are both specified, then disable merge-back.
 	 * this allows for a --static which searches private modules, but has the same fragment behaviour as if

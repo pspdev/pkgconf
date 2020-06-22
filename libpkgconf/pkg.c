@@ -99,7 +99,7 @@ pkgconf_pkg_parser_version_func(const pkgconf_client_t *client, pkgconf_pkg_t *p
 	/* cut at any detected whitespace */
 	p = pkgconf_tuple_parse(client, &pkg->vars, value);
 
-	len = strcspn(p, " \t\r\n");
+	len = strcspn(p, " \t");
 	if (len)
 	{
 		i = p + (ptrdiff_t) len;
@@ -381,12 +381,18 @@ pkgconf_pkg_new_from_file(pkgconf_client_t *client, const char *filename, FILE *
 	/* make module id */
 	if ((idptr = strrchr(pkg->filename, PKG_DIR_SEP_S)) != NULL)
 		idptr++;
-#ifdef _WIN32
-	else if ((idptr = strrchr(pkg->filename, '/')) != NULL)
-		idptr++;
-#endif
 	else
 		idptr = pkg->filename;
+
+#ifdef _WIN32
+	/* On Windows, both \ and / are allowed in paths, so we have to chop both.
+	 * strrchr() took us to the last \ in that case, so we just have to see if
+	 * it is followed by a /.  If so, lop it off.
+	 */
+	char *mungeptr;
+	if ((mungeptr = strrchr(idptr, '/')) != NULL)
+		idptr = mungeptr++;
+#endif
 
 	pkg->id = strdup(idptr);
 	idptr = strrchr(pkg->id, '.');
@@ -526,8 +532,8 @@ pkgconf_pkg_try_specific_path(pkgconf_client_t *client, const char *path, const 
 
 	PKGCONF_TRACE(client, "trying path: %s for %s", path, name);
 
-	snprintf(locbuf, sizeof locbuf, "%s/%s" PKG_CONFIG_EXT, path, name);
-	snprintf(uninst_locbuf, sizeof uninst_locbuf, "%s/%s-uninstalled" PKG_CONFIG_EXT, path, name);
+	snprintf(locbuf, sizeof locbuf, "%s%c%s" PKG_CONFIG_EXT, path, PKG_DIR_SEP_S, name);
+	snprintf(uninst_locbuf, sizeof uninst_locbuf, "%s%c%s-uninstalled" PKG_CONFIG_EXT, path, PKG_DIR_SEP_S, name);
 
 	if (!(client->flags & PKGCONF_PKG_PKGF_NO_UNINSTALLED) && (f = fopen(uninst_locbuf, "r")) != NULL)
 	{
@@ -860,8 +866,8 @@ pkgconf_compare_version(const char *a, const char *b)
 		}
 
 		ret = strcmp(one, two);
-		if (ret)
-			return ret;
+		if (ret != 0)
+			return ret < 0 ? -1 : 1;
 
 		*str1 = oldch1;
 		*str2 = oldch2;

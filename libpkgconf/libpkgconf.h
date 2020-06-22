@@ -78,8 +78,8 @@ typedef struct pkgconf_cross_personality_ pkgconf_cross_personality_t;
 #define PKGCONF_FOREACH_LIST_ENTRY_REVERSE(tail, value) \
 	for ((value) = (tail); (value) != NULL; (value) = (value)->prev)
 
-#define LIBPKGCONF_VERSION	10603
-#define LIBPKGCONF_VERSION_STR	"1.6.3"
+#define LIBPKGCONF_VERSION	10700
+#define LIBPKGCONF_VERSION_STR	"1.7.0"
 
 struct pkgconf_fragment_ {
 	pkgconf_node_t iter;
@@ -202,6 +202,8 @@ struct pkgconf_cross_personality_ {
 	pkgconf_list_t filter_includedirs;
 
 	char *sysroot_dir;
+
+	bool want_default_static;
 };
 
 /* client.c */
@@ -247,6 +249,7 @@ PKGCONF_API pkgconf_cross_personality_t *pkgconf_cross_personality_find(const ch
 #define PKGCONF_PKG_PKGF_DONT_RELOCATE_PATHS		0x0800
 #define PKGCONF_PKG_PKGF_SIMPLIFY_ERRORS		0x1000
 #define PKGCONF_PKG_PKGF_DONT_FILTER_INTERNAL_CFLAGS	0x2000
+#define PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS	0x4000
 
 #define PKGCONF_PKG_DEPF_INTERNAL		0x1
 

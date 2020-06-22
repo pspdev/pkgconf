@@ -137,7 +137,7 @@ pkgconf_fragment_add(const pkgconf_client_t *client, pkgconf_list_t *list, const
 	if (*string == '\0')
 		return;
 
-	if (!pkgconf_fragment_is_special(string))
+	if (strlen(string) > 1 && !pkgconf_fragment_is_special(string))
 	{
 		frag = calloc(sizeof(pkgconf_fragment_t), 1);
 
@@ -150,7 +150,8 @@ pkgconf_fragment_add(const pkgconf_client_t *client, pkgconf_list_t *list, const
 	{
 		char mungebuf[PKGCONF_ITEM_SIZE];
 
-		if (list->tail != NULL && list->tail->data != NULL)
+		if (list->tail != NULL && list->tail->data != NULL &&
+		    !(client->flags & PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS))
 		{
 			pkgconf_fragment_t *parent = list->tail->data;
 
@@ -432,7 +433,11 @@ fragment_quote(const pkgconf_fragment_t *frag)
 		    (*src > ')' && *src < '+') ||
 		    (*src > ':' && *src < '=') ||
 		    (*src > '=' && *src < '@') ||
-		    (*src > 'Z' && *src < '^') ||
+		    (*src > 'Z' && *src < '\\') ||
+#ifndef _WIN32
+		    (*src == '\\') ||
+#endif
+		    (*src > '\\' && *src < '^') ||
 		    (*src == '`') ||
 		    (*src > 'z' && *src < '~') ||
 		    (*src > '~')))
@@ -442,8 +447,10 @@ fragment_quote(const pkgconf_fragment_t *frag)
 
 		if ((ptrdiff_t)(dst - out) + 2 > outlen)
 		{
+			ptrdiff_t offset = dst - out;
 			outlen *= 2;
 			out = realloc(out, outlen);
+			dst = out + offset;
 		}
 	}
 

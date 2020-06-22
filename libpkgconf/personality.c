@@ -138,6 +138,16 @@ typedef struct {
 } personality_keyword_pair_t;
 
 static void
+personality_bool_func(pkgconf_cross_personality_t *p, const char *keyword, const size_t lineno, const ptrdiff_t offset, char *value)
+{
+	(void) keyword;
+	(void) lineno;
+
+	bool *dest = (bool *)((char *) p + offset);
+	*dest = strcasecmp(value, "true") || strcasecmp(value, "yes") || *value == '1';
+}
+
+static void
 personality_copy_func(pkgconf_cross_personality_t *p, const char *keyword, const size_t lineno, const ptrdiff_t offset, char *value)
 {
 	(void) keyword;
@@ -164,6 +174,7 @@ static const personality_keyword_pair_t personality_keyword_pairs[] = {
 	{"SystemIncludePaths", personality_fragment_func, offsetof(pkgconf_cross_personality_t, filter_includedirs)},
 	{"SystemLibraryPaths", personality_fragment_func, offsetof(pkgconf_cross_personality_t, filter_libdirs)},
 	{"Triplet", personality_copy_func, offsetof(pkgconf_cross_personality_t, name)},
+	{"WantDefaultStatic", personality_bool_func, offsetof(pkgconf_cross_personality_t, want_default_static)},
 };
 
 static int
@@ -186,7 +197,7 @@ personality_keyword_set(pkgconf_cross_personality_t *p, const size_t lineno, con
 	pair->func(p, keyword, lineno, pair->offset, value);
 }
 
-static const pkgconf_parser_operand_func_t personality_parser_ops[] = {
+static const pkgconf_parser_operand_func_t personality_parser_ops[256] = {
 	[':'] = (pkgconf_parser_operand_func_t) personality_keyword_set
 };
 
@@ -266,6 +277,6 @@ pkgconf_cross_personality_find(const char *triplet)
 
 finish:
 	pkgconf_path_free(&plist);
-	return out;
+	return out != NULL ? out : pkgconf_cross_personality_default();
 }
 #endif
