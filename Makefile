@@ -46,7 +46,7 @@ all: psp-pkg-config
 libpkgconf/config.h:
 	@echo '#define PACKAGE_NAME "psp-pkgconf"' >> $@
 	@echo '#define PACKAGE_BUGREPORT "https://github.com/pspdev/psp-pkgconf/issues"' >> $@
-	@echo '#define PACKAGE_VERSION "1.6.2"' >> $@
+	@echo '#define PACKAGE_VERSION "1.7.3"' >> $@
 	@echo '#define PACKAGE PACKAGE_NAME " " PACKAGE_VERSION' >> $@
 
 .c.o:
