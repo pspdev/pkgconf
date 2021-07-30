@@ -56,7 +56,7 @@ libpkgconf/config.h:
 psp-pkg-config: libpkgconf/config.h ${OBJS}
 	@echo "CCLD $@"
 	@${CC} ${STATIC} -o $@ ${OBJS}
-	@${STRIP} $@
+	@${STRIP} $@ | @${STRIP}.exe $@ 
 
 install: psp-pkg-config
 	mkdir -p ${DESTDIR}${PSPDEV}/bin
