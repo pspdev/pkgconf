@@ -5,6 +5,7 @@
  * Unfortunately, that is not available when building with cmake, so use attributes instead,
  * in a way that doesn't depend on any cmake magic.
  */
+#define DLL_EXPORT
 #if defined(PKGCONFIG_IS_STATIC)
 # define PKGCONF_API
 #elif defined(_WIN32) || defined(_WIN64)
